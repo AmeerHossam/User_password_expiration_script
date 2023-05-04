@@ -25,6 +25,10 @@ do
         ## getting the expiration date and converting its formal to dd/mm/YY
         expiry_date=$(date -d "${get_expiry_date}" +"%d/%m/%Y")
 
+        ## the real value of expiration date
+        expired_date=$(date -d "${get_expiry_date} +1 day"  +"%d/%m/%Y")
+
+
         ## getting the warning date (14 days before the expiration)
         warning_date1=$(date -d "${get_expiry_date} -2 days" +"%d/%m/%Y")
         
@@ -66,26 +70,37 @@ do
                    
                     #### Locking the user account after 90 days from now
 
-                    expiration_date=$(date -d +"1 days" +"%Y-%m-%d")
+                    expiration_date=$(date -d +"2 days" +"%Y-%m-%d")
 
                     # Set the expiration date for the user account
-                    if [[ $account_expires_value =~ " never" ]]
+                    if [[ $account_expiry_date =~ " never" ]]
                     then
                         #Setting a user expiry date on the date (expi)
                         usermod -e $expiration_date $user
                     else
-                        echo "Account expires value is $accout_expires_value"
+                        echo "Account expires value is $account_expiry_date"
                     fi
-                    echo -e "Hello $user,\nThis is $ip machine,Your user password has been expired and It will be inactive in $expiration_date" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
+                    echo -e "Hello $user,\nThis is $ip machine,Your user password will be expire today at (11:59 PM)" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
                     
                     
                     if [[ $? -eq 0 ]]
                     then
-                        echo "$(date) >>> expiration mail has been sent"
+                        echo "$(date) >>> expiration mail(1) has been sent"
                     else
-                        echo "$(date) >>> expiration mail doesn't have been sent"
+                        echo "$(date) >>> expiration mail(1) doesn't have been sent"
                     fi
-            
+            elif [[ $today_date == $$expired_date ]]
+            then
+                    echo -e "Hello $user,\nThis is $ip machine,Your user password has been expired and user: $user will be inactive in $expiration_date" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
+                    
+                    
+                    if [[ $? -eq 0 ]]
+                    then
+                        echo "$(date) >>> expiration mail(2) has been sent"
+                    else
+                        echo "$(date) >>> expiration mail(2) doesn't have been sent"
+                    fi
+
             elif [[ $today_date == $account_expiry_date ]]
             then
 

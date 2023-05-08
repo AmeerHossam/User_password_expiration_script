@@ -5,6 +5,7 @@ users="tst1"
 ip=$(hostname -I)
 ## getting the date of today
 today_date=$(date +"%d/%m/%Y")
+tomorrow_date=$(date -d +"1 days" +"%Y-%m-%d")
 
 #### Looping inside the normal users ####
 
@@ -34,9 +35,20 @@ do
         
         ## getting the warning date 2 (7 days before the expiration)
         warning_date2=$(date -d "${get_expiry_date} -1 days" +"%d/%m/%Y")
+
+        #### Locking the user account after 90 days from now
+
+        expiration_date=$(date -d +"2 days" +"%Y-%m-%d")
         
         ## getting the inactive date of the user
+
         account_expiry_date=$(date -d "$(chage -l $user | awk -F: 'NR==4{print $2}')" +"%d/%m/%Y")
+        if [[ $? -eq 0 ]]
+        then
+            echo "$(date) >>> account expiry date has a value"
+        else
+            echo "$(date) >>> account expiry date hasn't a value    "
+        fi
 
         #### Checking if the status is (P)
         if [[ $password_validation == "P" ]]
@@ -67,10 +79,6 @@ do
             #### Checking if today is the expiration day
             elif [[ $today_date == $expiry_date ]]
             then
-                   
-                    #### Locking the user account after 90 days from now
-
-                    expiration_date=$(date -d +"2 days" +"%Y-%m-%d")
 
                     # Set the expiration date for the user account
                     if [[ $account_expiry_date =~ " never" ]]
@@ -89,32 +97,14 @@ do
                     else
                         echo "$(date) >>> expiration mail(1) doesn't have been sent"
                     fi
-            elif [[ $today_date == $$expired_date ]]
-            then
-                    echo -e "Hello $user,\nThis is $ip machine,Your user password has been expired and user: $user will be inactive in $expiration_date" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
-                    
-                    
-                    if [[ $? -eq 0 ]]
-                    then
-                        echo "$(date) >>> expiration mail(2) has been sent"
-                    else
-                        echo "$(date) >>> expiration mail(2) doesn't have been sent"
-                    fi
 
             elif [[ $today_date == $account_expiry_date ]]
             then
 
                 ## It will change the user password status to be locked
                 passwd -l $user
-            
-            else
-                    echo "Something went wrong with date value"
-            fi
-
-        #### Checking if the status is (L)
-        elif [[ $password_validation == "L" ]]
-        then
-                echo -e "Hello $user,\nThis is $ip machine,Your account has been locked" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
+                
+                echo -e "Hello $user,\nThis is $ip machine, user: $user 's password has been expired, user has been locked and It will be deleted tomorrow in ${tomorrow_date} at (00:00 AM)" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
 
                 if [[ $? -eq 0 ]]
                 then
@@ -122,7 +112,13 @@ do
                 else
                     echo "$(date) >>> account locked mail doesn't have been sent"
                 fi
-                
+            
+            else
+                    echo "Something went wrong with date value Today is (${today_date}) and account expiry date is (${account_expiry_date})"
+            fi
+        #### Checking if the status is (L)
+        elif [[ $password_validation == "L" ]]
+        then                
                 function Deleting_User(){
                     killall -u $user
                     userdel $user
@@ -134,7 +130,25 @@ do
                         echo "$user failed to delete!"
                     fi
                 }
-                Deleting_User          
+                Deleting_User
+                
+                echo -e "Hello $user,\nThis is $ip machine, user: $user has been  deleted" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
+
+                if [[ $? -eq 0 ]]
+                then
+                    echo "$(date) >>> account locked mail has been sent"
+                else
+                    echo "$(date) >>> account locked mail doesn't have been sent"
+                fi
+
+                echo -e "Hello $user,\nThis is $ip machine,user: $user has been deleted" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
+
+                if [[ $? -eq 0 ]]
+                then
+                    echo "$(date) >>> account locked mail has been sent"
+                else
+                    echo "$(date) >>> account locked mail doesn't have been sent"
+                fi          
         
 
         #### Checking if the status is (NP)
@@ -144,9 +158,9 @@ do
                 
                 if [[ $? -eq 0 ]]
                 then
-                    echo "$(date) >>> No password mail has been sent"
+                    echo "$(date) >>> "No password" mail has been sent"
                 else
-                    echo "$(date) >>> No password mail doesn't have been sent"
+                    echo "$(date) >>> "No password" mail doesn't have been sent"
                 fi
 
                 passwd -e $user

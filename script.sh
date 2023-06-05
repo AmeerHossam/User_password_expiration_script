@@ -131,15 +131,6 @@ do
                     fi
                 }
                 Deleting_User
-                
-                echo -e "Hello $user,\nThis is $ip machine, user: $user has been  deleted" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
-
-                if [[ $? -eq 0 ]]
-                then
-                    echo "$(date) >>> account locked mail has been sent"
-                else
-                    echo "$(date) >>> account locked mail doesn't have been sent"
-                fi
 
                 echo -e "Hello $user,\nThis is $ip machine,user: $user has been deleted" | mutt -F /home/amir.hossam/Desktop/.muttrcJumpserver -s "Expiration Password Date" -- $email
 

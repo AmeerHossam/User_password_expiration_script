@@ -36,7 +36,7 @@ do
         ## getting the warning date 2 (7 days before the expiration)
         warning_date2=$(date -d "${get_expiry_date} -1 days" +"%d/%m/%Y")
 
-        #### Locking the user account after 90 days from now
+        #### Locking the user account after 2 days from now
 
         expiration_date=$(date -d +"2 days" +"%Y-%m-%d")
         
